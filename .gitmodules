@@ -1,0 +1,3 @@
+[submodule "first_repo"]
+	path = first_repo
+	url = https://github.com/shriyaai/first_repo

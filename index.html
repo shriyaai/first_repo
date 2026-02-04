@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Courier Order System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 600px;
+            background: white;
+            padding: 25px;
+            margin: auto;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            background: #e9f5ff;
+            border-left: 5px solid #007bff;
+        }
+
+        .orders {
+            margin-top: 20px;
+        }
+
+        .order-box {
+            background: #f1f1f1;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Courier Order System</h2>
+
+    <input type="text" id="sender" placeholder="Sender Name">
+    <input type="text" id="receiver" placeholder="Receiver Name">
+    <input type="text" id="product" placeholder="Product Name">
+    <textarea id="description" placeholder="Order Description"></textarea>
+
+    <button onclick="placeOrder()">Place Order</button>
+
+    <div id="result" class="result" style="display:none;"></div>
+
+    <button style="margin-top:15px;background:#28a745" onclick="viewOrders()">View All Orders</button>
+
+    <div class="orders" id="orders"></div>
+</div>
+
+<script>
+    function placeOrder() {
+        const sender = document.getElementById("sender").value;
+        const receiver = document.getElementById("receiver").value;
+        const product = document.getElementById("product").value;
+        const description = document.getElementById("description").value;
+
+        if (!sender || !receiver || !description) {
+            alert("Please fill all required fields");
+            return;
+        }
+
+        fetch("http://localhost:3000/order", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                sender,
+                receiver,
+                product,
+                description
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            const resultDiv = document.getElementById("result");
+            resultDiv.style.display = "block";
+            resultDiv.innerHTML = `<b>Delivery Type:</b> ${data.deliveryType}`;
+        })
+        .catch(err => {
+            alert("Server not running");
+            console.error(err);
+        });
+    }
+
+    function viewOrders() {
+        fetch("http://localhost:3000/orders")
+        .then(res => res.json())
+        .then(data => {
+            const ordersDiv = document.getElementById("orders");
+            ordersDiv.innerHTML = "";
+
+            if (data.length === 0) {
+                ordersDiv.innerHTML = "<p>No orders placed yet.</p>";
+                return;
+            }
+
+            data.forEach((order, index) => {
+                ordersDiv.innerHTML += `
+                    <div class="order-box">
+                        <b>Order ${index + 1}</b><br>
+                        Sender: ${order.sender}<br>
+                        Receiver: ${order.receiver}<br>
+                        Product: ${order.product}<br>
+                        Description: ${order.description}<br>
+                        <b>Delivery:</b> ${order.deliveryType}
+                    </div>
+                `;
+            });
+        })
+        .catch(err => {
+            alert("Unable to fetch orders");
+            console.error(err);
+        });
+    }
+</script>
+
+</body>
+</html>
+
